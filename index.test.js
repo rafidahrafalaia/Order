@@ -37,6 +37,24 @@ function startServer() {
 
 const app = startServer();
 
+let TOKEN;
+describe("LOGIN TEST", () => {
+  const value_post = {
+    "email": "test@test.com",
+    "password": "Rahasia2"
+    };
+
+    test("POST SUCCESS", async () => {
+      await supertest(app)
+      .post("/login")
+          .send(value_post)
+          .expect(200)
+          .expect((res) => {
+            TOKEN = res.body.access_token;
+          })
+    });
+
+});
 describe("ORDER TEST", () => {
   const value_post = {
     "name": "POST",
@@ -54,6 +72,7 @@ describe("ORDER TEST", () => {
     await supertest(app)
     .post("/order")
         .send(value_post)
+        .set('Authorization', `Bearer ${TOKEN}`)
         .expect(200)
         .expect((res) => {
           elementId = res.body.id;
@@ -64,16 +83,19 @@ describe("ORDER TEST", () => {
     await supertest(app)
     .post("/order")
         .send(value_fail)
+        .set('Authorization', `Bearer ${TOKEN}`)
         .expect(400)
   });
 
   test("GET SUCCESS", async () => {
     await supertest(app).get("/order/"+elementId)
+    .set('Authorization', `Bearer ${TOKEN}`)
       .expect(200);
   });
   
   test("GET FAIL", async () => {
       await supertest(app).get("/order/"+"dada0c40-539f-479a-99aa-8ad11722aadc")
+      .set('Authorization', `Bearer ${TOKEN}`)
         .expect(404);
   });
 
